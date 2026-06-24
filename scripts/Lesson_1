@@ -1,0 +1,16 @@
+--Setting up project 
+
+
+--create database warehouse basics
+
+
+Use master;
+Create database DataWarehouse;
+-- using datawarehouse
+USE DataWarehouse
+-- creating scemas
+create schema bronze;
+go
+create schema silver;
+go 
+create schema gold;
