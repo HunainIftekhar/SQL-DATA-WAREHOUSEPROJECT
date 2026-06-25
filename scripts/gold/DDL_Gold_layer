@@ -1,0 +1,62 @@
+/* This layer creates gold views */
+
+select 
+Row_number() over(order by cst_id) as customer_key,
+	ci.cst_id as customer_id,
+	ci.cst_key as customer_number,
+	ci.cst_firstname as first_name,
+	ci.cst_material_status as last_name,
+	ca.gen as gender,
+	ca.bdate as birthdate,
+	ci.cst_gndr as marital_status,
+	la.cntry as country,
+	substring(cst_create_date, 3, LEN(cst_create_date)) as create_date
+from 
+silver.crm_cust_info ci
+left join silver.erp_cust_AZ12 ca
+on ci.cst_key = ca.cid
+left join silver.erp_loc_a101 la
+on ci.cst_key = la.cid
+
+
+
+Create view gold.dim_products AS
+
+SELECT 
+Row_number() over  (order by pn.prd_key,pn.prd_start_dt) as Product_key,
+	pn.prd_id as product_id,
+	pn.prd_key  as product_number,
+	pn.prd_nm as product_name,
+	pn.prd_cost as product_cost,
+	pc.maintainace as  maintenance,
+	pn.prd_line as product_line,
+	pc.cat as category,
+	pn.cat_id as category_id,
+	pc.sub_cat as sub_category,
+	pn.prd_start_dt as product_start_date
+
+FROM 
+SILVER.crm_prd_info pn
+left join silver.erp_cat_G1V2 pc
+ on pn.cat_id = pc.id
+where prd_end_date is null
+
+
+
+
+create view gold.fact_sales as 
+select 
+sls_ord_num as order_number,
+pr.product_key,
+cu.customer_id,
+sls_order_date as order_date,
+sls_ship_date as shippind_date,
+sls_due_date as due_date,
+sls_sales sales_amount,
+sls_quality as quantity,
+sls_price as price
+from silver.crm_sales_detailes sd
+left join gold.dim_products pr
+on sd.sls_prd_key = pr.product_number 
+left join gold.dim_customers cu
+on sd.sls_cust_id = cu.customer_id
